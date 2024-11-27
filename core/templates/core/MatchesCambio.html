@@ -1,0 +1,146 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Match Cambio{% endblock %}
+
+{% block contenido %}
+
+<!-- Aquí puedes agregar más contenido específico del perfil de usuario -->
+
+
+<main class="mt-5">
+
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="{% if message.tags %}alert alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+
+    <form method="GET" action="{% url 'MatchesCambio' %}">
+      <!-- Search form code -->
+    </form>
+    <br>
+    <h1 class="text-center font-weight-bold mx-3">
+      <i class="fas fa-hands mr-2"></i>
+      {% if user.is_authenticated and user.email == 'admin@admin.cl' %}
+        Total Matches de Cambio
+      {% else %}
+        Mis Matches de Cambio
+      {% endif %}
+    </h1>
+    <br>
+    {% if matches %}
+    <table class="table table-striped" style="width: 93%; margin: auto;">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Fecha Propuesta</th>
+          <th scope="col">Producto</th>
+          <th scope="col">Usuario Dueño</th>
+          <th scope="col">Usuario Solicitante</th>
+          <th scope="col">Producto Propuesto</th>
+          <th scope="col">Estado Solicitud</th>
+          <th scope="col">Confirmación Match</th>
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for match in matches %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td>{{ match.fecha_propuesta }}</td>
+          <td>{{ match.producto.p_nombre }}</td>
+          <td>{{ match.usuario_dueño }}</td>
+          <td>{{ match.usuario_solicitante }}</td>
+          <td>{{ match.producto_propuesto.p_nombre }}</td>
+          <td>{{ match.get_estado_solicitud_display }}</td>
+          <td>{{ match.get_confirmacion_match_display }}</td>
+          <td>
+            <div class="btn-group">
+              <form id="ChatMatch_{{ match.PostMatch }}" method="post" action="{% url 'ChatMensajes' postmatch_id=match.PostMatch %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-lg {% if not match.confirmacion_match and user.email != 'root@root.com' %} btn-secondary {% else %} btn-warning {% endif %} btn-grow" title="Chat" {% if not match.confirmacion_match and user.email != 'root@root.com' %} disabled {% endif %}>
+                  <i class="fas fa-comment"></i>
+                </button>
+              </form>
+
+              {% if user == "admin@admin.cl" or user == match.usuario_dueño %}
+              <form id="ConfirmarMatch_{{ match.PostMatch }}" method="post" action="{% url 'ConfirmarMatchCambio' %}">
+                {% csrf_token %}
+                <input type="hidden" name="match_id" value="{{ match.PostMatch }}">
+                <button class="btn btn-lg {% if match.confirmacion_match %} btn-primary {% else %} btn-secondary {% endif %} btn-grow" title="Confirmar" onclick="event.preventDefault(); mostrarConfirmacionMatch('{{ match.PostMatch }}', {{ match.confirmacion_match }})">
+                  <i class="fas fa-check"></i>
+                </button>
+              </form>
+              {% endif %}
+
+              <form id="EliminarMatch_{{ match.PostMatch }}" method="post" action="{% url 'MatchesCambio' %}">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-lg btn-grow" title="Eliminar" onclick="event.preventDefault(); mostrarConfirmacionEliminar('{{ match.PostMatch }}')">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="text-center mt-5">
+      <i class="fas fa-search-minus" style="font-size: 100px; color: #2765a2;"></i>
+      <h3 class="text-primary">No cuentas con match para cambios</h3>
+    </div>
+    {% endif %}
+
+</main>
+
+
+
+{% endblock contenido %}
+
+{% block js %}
+
+<script>
+
+      function mostrarConfirmacionMatch(id, confirmacionMatch) {
+        var confirmText = confirmacionMatch == 0 ? '¿QUIERES CONFIRMAR ESTE MATCH?' : '¿ESTÁS SEGURO DESEAS DESCONFIRMAR EL MATCH?';
+        var confirmButtonText = confirmacionMatch == 0 ? 'Sí' : 'Desconfirmar';
+
+        Swal.fire({
+          title: confirmText,
+          text: '¿Realmente deseas confirmar?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: confirmButtonText,
+          cancelButtonText: 'No',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            document.getElementById('ConfirmarMatch_' + id).submit();
+          }
+        });
+      }
+
+      function mostrarConfirmacionEliminar(matchId) {
+        Swal.fire({
+          title: '¿QUIERES ELIMINAR?',
+          text: '¿Estás seguro de que deseas eliminar este producto?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí',
+          cancelButtonText: 'No',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            document.getElementById('EliminarMatch_' + matchId).submit();
+          }
+        });
+      }
+    </script>
+
+{% endblock js %}

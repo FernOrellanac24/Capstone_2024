@@ -1,0 +1,110 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Perfil de Usuario{% endblock %}
+
+{% block contenido %}
+<style>
+    .profile-image:hover {
+    transform: scale(1.1); /* Aumentar el tamaño de la imagen */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Añadir sombra */
+}
+
+</style>
+
+<main style="margin-top: 90px;">
+    <div class="container">
+        <h2 class="text-center mb-4">Mi Perfil de Usuario</h2>
+
+        <div class="row justify-content-center align-items-start">
+            <!-- Imagen de perfil -->
+            <div class="col-12 col-md-4 text-center mb-3 mb-md-0">
+                <div class="profile-image-container">
+                    {% if request.user.profile_image %}
+                    <img src="{{ request.user.profile_image.url }}" alt="Foto de perfil" class="profile-image img-fluid rounded-circle"
+                        style="width: 200px; height: 200px; object-fit: cover; transition: transform 0.3s;">
+                    {% else %}
+                    <img src="{% static 'images/default-profile.jpg' %}" alt="Foto de perfil predeterminada" class="profile-image img-fluid rounded-circle"
+                        style="width: 200px; height: 200px; object-fit: cover;">
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Información del perfil -->
+            <div class="col-12 col-md-8">
+                <div class="form-group">
+                    <label for="nombres">Nombres:</label>
+                    <input type="text" id="nombres" name="nombres" readonly class="form-control" value="{{ request.user.nombre }}">
+                </div>
+                <div class="form-group">
+                    <label for="apellidos">Apellidos:</label>
+                    <input type="text" id="apellidos" name="apellidos" readonly class="form-control" value="{{ request.user.apellido }}">
+                </div>
+                <div class="form-group">
+                    <label for="rut">RUT:</label>
+                    <input type="text" id="rut" name="rut" readonly class="form-control" value="{{ request.user.rut_usuario }}">
+                </div>
+                <div class="form-group">
+                    <label for="correo">Correo DUOC UC:</label>
+                    <input type="text" id="correo" name="correo" readonly class="form-control" value="{{ request.user.email }}">
+                </div>
+            </div>
+        </div>
+
+        <br>
+
+        <!-- Generar Código QR -->
+        <form method="POST" action="{% url 'PerfilUsuario' %}" class="text-center">
+            {% csrf_token %}
+            <button type="submit" name="generate_qr" class="btn btn-primary mb-3">
+                Generar Código QR
+            </button>
+            {% if qr_image_data_url %}
+            <button type="submit" name="delete_qr" class="btn btn-danger mb-3">
+                Eliminar Código QR
+            </button>
+            {% endif %}
+        </form>
+
+        <!-- Mostrar el código QR -->
+        {% if qr_image_data_url %}
+        <div class="text-center">
+            <img src="{{ qr_image_data_url }}" alt="Código QR" class="qr-image mb-3" style="width: 150px; height: 150px; object-fit: contain;">
+            <a href="{% url 'descargar_qr' %}" class="btn btn-primary">
+                Descargar Código QR
+            </a>
+        </div>
+        {% endif %}
+
+        <br>
+        <!-- Botón para editar el perfil -->
+        <div class="text-center">
+            <a href="{% url 'editar_perfil' %}" class="btn btn-success">
+                <i class="fas fa-user-edit"></i> Editar Perfil
+            </a>
+        </div>
+    </div>
+</main>
+
+{% endblock contenido %}
+
+{% block js %}
+<script>
+    // Mejorar interacción del código QR con una función de compartir
+    function compartirQR() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Mi Código QR',
+                text: 'Aquí está mi información de contacto en formato QR',
+                url: "{{ qr_image_data_url }}"  // Enlace para compartir (puedes adaptarlo si deseas compartir el contenido en texto)
+            }).then(() => {
+                console.log('Compartido exitosamente');
+            }).catch((error) => {
+                console.error('Error al compartir', error);
+            });
+        } else {
+            alert('La API de compartir no es compatible con este dispositivo.');
+        }
+    }
+</script>
+{% endblock js %}

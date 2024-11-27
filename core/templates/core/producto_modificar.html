@@ -1,0 +1,86 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Perfil de Usuario{% endblock %}
+
+{% block contenido %}
+
+<!-- Aquí puedes agregar más contenido específico de modificar producto -->
+
+<main style="margin-top: 58px;">
+    <br><br>
+    <h3 style="margin-left: 5%; margin-right: 5%; text-align: center; font-weight: bold;">
+        Modificar Publicación de Producto
+    </h3>
+    
+    {% if messages %}
+        <div style="margin-left: 5%; margin-right: 5%;">
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form style="margin-left: 5%; margin-right: 5%;" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p | safe }}
+
+        {% if form.instance.p_img %}
+            <div class="text-center">
+                <h5>Imagen Actual:</h5>
+                {{ form.get_image_preview | safe }}
+            </div>
+        {% endif %}
+
+        <div class="row text-center">
+            <div class="col">
+                <button type="submit" class="btn btn-success">
+                    <i class="fa fa-save"></i> Guardar Edición
+                </button>
+            </div>
+            <div class="col">
+                <a href="{% url 'ProductoListar' %}" class="btn btn-danger">
+                    <i class="fa fa-times"></i> Cancelar Edición
+                </a>
+            </div>
+        </div>
+    </form>
+</main>
+
+
+   
+
+{% endblock contenido %}
+
+{% block js %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener el elemento select del tipo de transacción
+        const tipoTransSelect = document.getElementById('tipoTrans');
+        const precioInput = document.getElementById('id_p_precio');  // Asegúrate de que este ID coincida con el ID generado para el campo precio
+
+        // Función para mostrar/ocultar el campo de precio
+        function togglePrecioField() {
+            if (tipoTransSelect.value == "3") { // Cambia "3" por el valor real que representa "venta" en tu base de datos
+                precioInput.style.display = 'block'; // Muestra el campo de precio
+            } else {
+                precioInput.style.display = 'none'; // Oculta el campo de precio
+                precioInput.value = ''; // Limpia el valor del campo si no es venta
+            }
+        }
+
+        // Llama a la función al cargar la página para establecer el estado inicial
+        togglePrecioField();
+
+        // Agrega un evento de cambio al select
+        tipoTransSelect.addEventListener('change', togglePrecioField);
+    });
+</script>
+
+
+
+{% endblock js %}

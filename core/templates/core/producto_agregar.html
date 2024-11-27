@@ -1,0 +1,135 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Perfil de Usuario{% endblock %}
+
+
+
+{% block contenido %}
+
+<style>
+  /* Ajustar los campos de entrada */
+  .form-control-sm {
+    padding: .25rem .5rem; /* Reduce aún más el padding interno */
+    font-size: .75rem; /* Reduce el tamaño de la fuente */
+    height: 30px; /* Reduce la altura de los campos */
+  }
+
+  /* Reducir el tamaño del botón */
+  .btn-sm {
+    padding: .25rem .5rem; /* Reduce el tamaño del botón */
+    font-size: .75rem;
+    height: 30px; /* Ajusta la altura del botón */
+  }
+
+  /* Ajustar el ancho del formulario */
+  .container-sm {
+    max-width: 1000px; /* Ajusta el ancho para hacerlo más compacto */
+  }
+
+  /* Reducir el padding dentro de la tarjeta */
+  .card-body {
+    padding: .25rem; /* Reduce el padding dentro de la tarjeta */
+  }
+
+  /* Reducir el espacio entre los campos */
+  .mb-2 {
+    margin-bottom: .25rem; /* Reduce aún más el espacio entre los elementos */
+  }
+
+  /* Reducir el margen de la tarjeta */
+  .card {
+    margin-top: .4rem; /* Ajusta el margen superior */
+    margin-bottom: .4rem; /* Ajusta el margen inferior */
+  }
+</style>
+
+
+<div class="container-sm mt-4">
+  <div class="card shadow-sm border-light">
+    <div style="text-align: center;"  class="card-header bg-warning text-black" >
+      <h3>Agregar Nuevo Producto</h3>
+    </div>
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Nombre del Producto -->
+        <div class="mb-2">
+          <label for="{{ form.p_nombre.id_for_label }}" class="form-label">{{ form.p_nombre.label }}</label>
+          {{ form.p_nombre }}
+        </div>
+
+        <!-- Imagen del Producto -->
+        <div class="mb-2">
+          <label for="{{ form.p_img.id_for_label }}" class="form-label">{{ form.p_img.label }}</label>
+          {{ form.p_img }}
+        </div>
+
+        <!-- Tipo de Transacción -->
+        <div class="mb-2">
+          <label for="{{ form.p_tipoTrans.id_for_label }}" class="form-label">{{ form.p_tipoTrans.label }}</label>
+          {{ form.p_tipoTrans }}
+        </div>
+
+        <!-- Precio (solo se muestra si es tipo de venta) -->
+        <div id="precio-container" style="display:none;">
+          <label for="{{ form.p_precio.id_for_label }}" class="form-label">{{ form.p_precio.label }}</label>
+          {{ form.p_precio }}
+        </div>
+
+        <!-- Descripción -->
+        <div class="mb-2">
+          <label for="{{ form.p_descripcion.id_for_label }}" class="form-label">{{ form.p_descripcion.label }}</label>
+          {{ form.p_descripcion }}
+        </div>
+
+        <!-- Categoría -->
+        <div class="mb-2">
+          <label for="{{ form.p_categoria.id_for_label }}" class="form-label">{{ form.p_categoria.label }}</label>
+          {{ form.p_categoria }}
+        </div>
+
+        <!-- Etiquetas -->
+        <div class="mb-2">
+          <label for="{{ form.p_tags.id_for_label }}" class="form-label">{{ form.p_tags.label }}</label>
+          {{ form.p_tags }}
+        </div>
+
+        <!-- Botón para enviar -->
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="btn btn-warning btn-lg">Agregar Producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock contenido %}
+
+{% block js %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const tipoTransSelect = document.getElementById('id_p_tipoTrans'); // ID del campo de tipo de transacción
+    const precioContainer = document.getElementById('precio-container'); // Contenedor del campo de precio
+
+    function togglePrecioField() {
+      console.log('ID de Tipo de Transacción:', tipoTransSelect.value); // Muestra el ID seleccionado
+
+      // Verifica que el valor sea exactamente "3" (el ID de "Venta")
+      if (tipoTransSelect.value === "3") {
+        precioContainer.style.display = 'block'; // Mostrar el campo de precio
+      } else {
+        precioContainer.style.display = 'none'; // Ocultar el campo de precio
+      }
+    }
+
+    // Inicializa el campo al cargar la página
+    togglePrecioField();
+
+    // Escucha cambios en el tipo de transacción
+    tipoTransSelect.addEventListener('change', togglePrecioField);
+  });
+</script>
+
+{% endblock js %}

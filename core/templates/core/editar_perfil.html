@@ -1,0 +1,85 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Editar Perfil de Usuario{% endblock %}
+
+{% block contenido %}
+
+<style>
+    .profile-image:hover {
+    transform: scale(1.1); /* Aumentar el tamaño de la imagen */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Añadir sombra */
+}
+
+</style>
+
+<main style="margin-top: 90px;">
+    <div class="container">
+        <h1 class="text-center mb-4">Editar Perfil</h1>
+
+        <div class="row justify-content-center">
+            <!-- Card para la foto de perfil -->
+            <div class="col-12 col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h5 class="card-title mb-3">Foto de Perfil</h5>
+                        
+                        <form action="{% url 'editar_perfil' %}" method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <div class="profile-image-container mb-3">
+                                {% if request.user.profile_image %}
+                                    <img src="{{ request.user.profile_image.url }}" alt="Foto de perfil" class="profile-image img-fluid rounded-circle" style="max-width: 200px; height: auto;">
+                                {% else %}
+                                    <img src="{% static 'images/default-profile.jpg' %}" alt="Foto de perfil predeterminada" class="profile-image img-fluid rounded-circle" style="max-width: 200px; height: auto;">
+                                {% endif %}
+                            </div>
+
+                            <input type="file" name="fotoPerfil" id="image-input" accept="image/*" class="form-control mb-3" onchange="previewImage(event)">
+                            <img id="preview" src="" alt="Vista previa de la imagen" style="display: none; max-width: 200px; margin-bottom: 10px; border-radius: 50%;">
+
+                            <button type="submit" name="cambiar_foto" class="btn btn-primary w-100">Guardar Cambios</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card para cambiar la contraseña -->
+            <div class="col-12 col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Cambiar Contraseña</h5>
+
+                        <form action="{% url 'editar_perfil' %}" method="post">
+                            {% csrf_token %}
+                            <div class="form-group mb-3">
+                                <label for="password">Nueva Contraseña:</label>
+                                {{ form_password.as_p }}
+                            </div>
+                            <button type="submit" name="cambiar_contrasenia" class="btn btn-danger w-100">Cambiar Contraseña</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock contenido %}
+
+{% block js %}
+<script>
+    function previewImage(event) {
+        var input = event.target;
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var preview = document.getElementById('preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+{% endblock js %}

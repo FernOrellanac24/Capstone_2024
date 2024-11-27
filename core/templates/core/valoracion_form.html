@@ -1,0 +1,96 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Calificación de Usuario{% endblock %}
+
+{% block contenido %}
+<div class="container" style="margin-top: 50px;">
+
+    <h2 class="text-center text-primary mb-4">Valoración del Match</h2>
+
+    <!-- Mensaje de éxito si se ha guardado la valoración -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-success" role="alert">
+            <strong>¡Éxito!</strong> {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Mensajes de error si hay algún problema -->
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger" role="alert">
+        <strong>Error:</strong> {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <!-- Formulario para la valoración -->
+    <div class="card shadow-lg mb-4" style="max-width: 800px; margin: auto;">
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="id_valormatch" class="form-label">Calificación:</label>
+                    <div class="input-group input-group-sm">
+                        {{ form.valormatch }}
+                    </div>
+                    {% if form.valormatch.errors %}
+                    <div class="text-danger">{{ form.valormatch.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                
+            
+                <div class="mb-3">
+                    <label for="id_opinion" class="form-label">Tu Opinión:</label>
+                    {{ form.opinion }}
+                    {% if form.opinion.errors %}
+                    <div class="text-danger">{{ form.opinion.errors }}</div>
+                    {% endif %}
+                </div>
+            
+                <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill">Enviar Valoración</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mostrar el Promedio de la Valoración -->
+    <h4 class="text-center text-secondary">Calificación Promedio:</h4>
+    <div class="d-flex justify-content-center mb-4">
+        <div class="star-rating">
+            {% for i in estrellas %}
+            {% if i <= promedio_valoracion %} 
+                <span class="fa fa-star checked"></span>
+            {% else %}
+                <span class="fa fa-star"></span>
+            {% endif %}
+            {% endfor %}
+            <span class="ms-2">{{ promedio_valoracion }} / 5</span>
+        </div>
+    </div>
+
+    <!-- Mostrar todas los comentarios -->
+    <h4 class="text-center text-secondary mb-4">Comentarios de Usuarios:</h4>
+<div class="mb-4">
+    {% for valoracion in valoraciones %}
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <strong class="text-primary">{{ valoracion.evaluador.username }}</strong>
+            <p class="text-muted" style="font-size: 1.1rem;">{{ valoracion.opinion }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+    <br>
+    <a href="{% url 'ListaChatMatch' %}" class="btn btn-outline-secondary btn-lg rounded-pill">Volver a la lista de matches</a>
+</div>
+
+{% endblock contenido %}
+
+{% block js %}
+<!-- Aquí puedes agregar scripts adicionales si es necesario -->
+{% endblock js %}

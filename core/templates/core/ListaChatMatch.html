@@ -1,0 +1,133 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Lista Mensajes de Usuario{% endblock %}
+
+{% block contenido %}
+
+<!-- Aquí puedes agregar más contenido específico del lista mensajes de usuario -->
+
+
+<main style="margin-top: 90px">
+    <form method="GET" action="{% url 'ListaChatMatch' %}" aria-label="Search Form">
+        <div class="input-group" style="width: 93%; margin: 0 20px;">
+            <input type="text" name="q" class="form-control" placeholder="Ingresa para buscar" value="{{ search_query }}" aria-label="Search input">
+            <button type="submit" class="btn btn-warning" aria-label="Search"><i class="fa fa-search"></i></button>
+        </div>
+    </form>
+    <br>
+    <h1 class="text-center font-weight-bold" style="margin: 0 5%;">Lista Foro Mensajes Activos</h1>
+    <br>
+
+    {% if matches_regalo %}
+        <section>
+            <h2>Foros para Regalo</h2>
+            <table class="table" style="width: 93%; margin: 0 20px;">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Fecha Propuesta</th>
+                        <th scope="col">Producto</th>
+                        <th scope="col">Usuario Dueño</th>
+                        <th scope="col">Usuario Solicitante</th>
+                        <th scope="col">Estado Solicitud</th>
+                        <th scope="col">Confirmación Match</th>
+                        <th scope="col">Ir A Foro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for match in matches_regalo %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{ match.fecha_propuesta }}</td>
+                            <td>{{ match.producto.p_nombre }}</td>
+                            <td>{{ match.usuario_dueño }}</td>
+                            <td>{{ match.usuario_solicitante }}</td>
+                            <td>{{ match.get_estado_solicitud_display }}</td>
+                            <td>{{ match.get_confirmacion_match_display }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <form id="ChatMatch_{{ match.PostMatch }}" method="post" action="{% url 'ChatMensajes' postmatch_id=match.PostMatch %}">
+                                        {% csrf_token %}
+                                        <button type="button" class="btn btn-warning btn-lg btn-grow" title="Chat" style="width: 200px;" onclick="document.getElementById('ChatMatch_{{ match.PostMatch }}').submit();">
+                                            <i class="fas fa-comment" style="margin-right: 5px;"></i>
+                                            Mensajes
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    {% endif %}
+    
+    {% if matches_cambio %}
+        <section>
+            <h2>Foro para Cambio</h2>
+            <table class="table" style="width: 93%; margin: 0 20px;">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Fecha Propuesta</th>
+                        <th scope="col">Producto</th>
+                        <th scope="col">Usuario Dueño</th>
+                        <th scope="col">Usuario Solicitante</th>
+                        <th scope="col">Estado Solicitud</th>
+                        <th scope="col">Confirmación Match</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for match in matches_cambio %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{ match.fecha_propuesta }}</td>
+                            <td>{{ match.producto.p_nombre }}</td>
+                            <td>{{ match.usuario_dueño }}</td>
+                            <td>{{ match.usuario_solicitante }}</td>
+                            <td>{{ match.get_estado_solicitud_display }}</td>
+                            <td>{{ match.get_confirmacion_match_display }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <form id="ChatMatch_{{ match.PostMatch }}" method="post" action="{% url 'ChatMensajes' postmatch_id=match.PostMatch %}">
+                                        {% csrf_token %}
+                                        <button type="button" class="btn btn-warning btn-lg btn-grow" title="Chat" style="width: 200px;" onclick="document.getElementById('ChatMatch_{{ match.PostMatch }}').submit();">
+                                            <i class="fas fa-comment" style="margin-right: 5px;"></i>
+                                            Mensajes
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    {% endif %}
+    
+    <br><br><br><br><br><br>
+    {% if not matches_regalo and not matches_cambio %}
+        <div style="text-align: center;">
+            <i class="fas fa-comment-slash" style="font-size: 100px; color: #2765a2;"></i>
+            <br>
+            <h3 style="color: #2765a2;">No cuentas con Mensajes en match activos</h3>
+        </div>
+    {% endif %}
+
+    
+</main>
+
+
+
+
+{% endblock contenido %}
+
+{% block js %}
+
+
+
+
+{% endblock js %}

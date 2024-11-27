@@ -1,0 +1,161 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Match Regalo{% endblock %}
+
+{% block contenido %}
+
+<!-- Aquí puedes agregar más contenido específico del perfil de usuario -->
+
+
+
+
+<!-- Main layout -->
+<main style="margin-top: 90px">
+
+{% if messages %}
+    <div>
+        {% for message in messages %}
+            <div class="{% if message.tags %}alert alert-{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+    <form method="GET" action="{% url 'MatchesRegalo' %}">
+        <input type="text" name="q" placeholder="Buscar..." class="form-control" style="display: inline-block; width: auto;">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
+    <br>
+    <h1 style="margin-left: 5%; margin-right: 5%; text-align: center; font-weight: bold;">
+        <i class="fas fa-gift" style="margin-right: 10px;"></i>
+        {% if user.is_authenticated and user.email == 'admin@admin.cl' %}
+            Total Matches de Regalo
+        {% else %}
+            Mis Matches de Regalo
+        {% endif %}
+    </h1>
+
+    <br>
+    {% if matches %}
+    <div class="table-responsive">
+        <table class="table table-striped" style="width: 93%; margin-left: 20px; margin-right: 20px;">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Fecha Propuesta</th>
+                    <th scope="col">Producto</th>
+                    <th scope="col">Usuario Dueño</th>
+                    <th scope="col">Usuario Solicitante</th>
+                    <th scope="col">Estado Solicitud</th>
+                    <th scope="col">Confirmación Match</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for match in matches %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ match.fecha_propuesta }}</td>
+                    <td>{{ match.producto.p_nombre }}</td>
+                    <td>{{ match.usuario_dueño }}</td>
+                    <td>{{ match.usuario_solicitante }}</td>
+                    <td>{{ match.get_estado_solicitud_display }}</td>
+                    <td>{{ match.get_confirmacion_match_display }}</td>
+                    <td>
+                        <div class="btn-group">
+                            {% if match.confirmacion_match %}
+                                <form id="ChatMatch_{{ match.PostMatch }}" method="post" action="{% url 'ChatMensajes' postmatch_id=match.PostMatch %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-warning btn-lg btn-grow" title="Chat">
+                                        <i class="fas fa-comment"></i>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-secondary btn-lg btn-grow" title="Chat" disabled>
+                                    <i class="fas fa-comment"></i>
+                                </button>
+                            {% endif %}
+                            
+                            {% if user == match.usuario_dueño %}
+                                <form id="ConfirmarMatch_{{ match.PostMatch }}" method="post" action="{% url 'ConfirmarMatchRegalo' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="match_id" value="{{ match.PostMatch }}">
+                                    <button class="btn {% if match.confirmacion_match %} btn-primary {% else %} btn-secondary {% endif %} btn-lg btn-grow" title="Confirmar" onclick="event.preventDefault(); mostrarConfirmacionMatch('{{ match.PostMatch }}', {{ match.confirmacion_match }})">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
+                            
+                            <form id="EliminarMatch_{{ match.PostMatch }}" method="post" action="{% url 'MatchesRegalo' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="match_id" value="{{ match.PostMatch }}">
+                                <button class="btn btn-danger btn-lg btn-grow" title="Eliminar" onclick="event.preventDefault(); mostrarConfirmacionEliminar('{{ match.PostMatch }}')">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <br><br><br><br><br><br>
+    <div style="text-align: center;">
+        <i class="fas fa-search-minus" style="font-size: 100px; color: #2765a2;"></i>
+        <br>
+        <h3 style="color: #2765a2;">No tienes coincidencias de regalos</h3>
+    </div>
+    {% endif %}
+
+</main>
+<!-- Main layout -->
+
+
+
+{% endblock contenido %}
+
+{% block js %}
+
+<script>
+        
+
+        function mostrarConfirmacionMatch(id, confirmacionMatch) {
+            var confirmText = confirmacionMatch == 0 ? '¿QUIERES CONFIRMAR ESTE MATCH?' : '¿ESTÁS SEGURO DESEAS DESCONFIRMAR EL MATCH?';
+            var confirmButtonText = confirmacionMatch == 0 ? 'Sí' : 'Desconfirmar';
+
+            Swal.fire({
+                title: confirmText,
+                text: '¿Realmente deseas confirmar?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: confirmButtonText,
+                cancelButtonText: 'No',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('ConfirmarMatch_' + id).submit();
+                }
+            });
+        }
+
+        function mostrarConfirmacionEliminar(matchId) {
+            Swal.fire({
+                title: '¿QUIERES ELIMINAR?',
+                text: '¿Estás seguro de que deseas eliminar este match?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'No',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('EliminarMatch_' + matchId).submit();
+                }
+            });
+        }
+    </script>
+
+{% endblock js %}

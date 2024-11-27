@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Reactivar Producto{% endblock %}
+
+{% block contenido %}
+
+<!-- Aquí puedes agregar más contenido específico de reactivar producto -->
+
+<main style="margin-top: 90px">
+    <form method="GET" action="{% url 'ProductoReactivar' %}">
+      <div class="input-group" style="width: 93%; margin-left: 20px; margin-right: 20px;">
+        <input type="text" name="q" class="form-control" placeholder="Ingresa para buscar" value="{{ request.GET.q }}">
+        <button type="submit" class="btn btn-warning"><i class="fa fa-search"></i></button>
+      </div>
+    </form>
+    <br>
+    <h1 style="margin-left: 5%; margin-right: 5%; text-align: center; font-weight: bold;">Reactivar Publicaciones</h1>
+    <br>
+    
+    <!-- Mostrar mensajes de éxito o error -->
+    {% if messages %}
+      <div class="alert alert-info" role="alert">
+        {% for message in messages %}
+          {{ message }}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <table class="table" style="width: 93%; margin-left: 20px; margin-right: 20px;">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Nombre Producto</th>
+          <th scope="col">Imagen Producto</th>
+          <th scope="col">Tipo Transaccion</th>
+          <th scope="col">Descripcion</th>
+          <th scope="col">Categoria</th>
+          <th scope="col">Tags</th>
+          {% if request.user.email == 'admin@admin.cl' %}
+          <th scope="col">Usuario</th>
+          {% endif %}
+          <th scope="col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for producto in productos %}
+        <tr>
+          <th scope="row">{{ forloop.counter }}</th>
+          <td>{{ producto.p_nombre }}</td>
+          <td>
+            <div class="text-center">
+              <div style="width: 80px; height: 80px; overflow: hidden;">
+                <img src="{{ producto.p_img.url }}" alt="{{ producto.p_nombre }}.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+              </div>
+            </div>
+          </td>
+          <td>{{ producto.p_tipoTrans }}</td>
+          <td>{{ producto.p_descripcion|truncatechars:20}}</td>
+          <td>{{ producto.p_categoria }}</td>
+          <td>{{ producto.p_tags }}</td>
+          {% if request.user.email == 'admin@admin.cl' %}
+          <td>{{ producto.p_account_email.email }}</td>
+          {% endif %}
+          <td>
+            <div class="btn-group">
+              <form id="ProductoReactivarForm{{ forloop.counter }}" method="POST" action="{% url 'ProductoReactivar' %}">
+                {% csrf_token %}
+                <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                <button class="btn btn-secondary btn-sm btn-grow" title="Reactivar" onclick="event.preventDefault(); mostrarConfirmacionReactivar('{{ producto.id }}', '{{ forloop.counter }}')">
+                  <i class="fa-solid fa-eye-slash"></i>
+                  <span class="btn-text">Reactivar</span>
+                </button>
+              </form>
+              <form id="ProductoEliminarForm{{ forloop.counter }}" method="POST" action="{% url 'ProductoEliminar' producto.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                <button class="btn btn-info btn-sm btn-grow" title="Eliminar" onclick="event.preventDefault(); mostrarConfirmacionEliminar('{{ producto.id }}', '{{ forloop.counter }}')">
+                  <i class="fa-solid fa-trash"></i>
+                  <span class="btn-text">Eliminar</span>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Agregar paginación -->
+    <div class="d-flex justify-content-center">
+      <nav aria-label="PaginacionElementos">
+        <ul class="pagination">
+          {% if productos.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ productos.previous_page_number }}&q={{ request.GET.q }}">Anterior</a>
+            </li>
+          {% endif %}
+
+          {% for i in productos.paginator.page_range %}
+            {% if productos.number == i %}
+              <li class="page-item active">
+                <a class="page-link" href="?page={{ i }}&q={{ request.GET.q }}">{{ i }}</a>
+              </li>
+            {% else %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ i }}&q={{ request.GET.q }}">{{ i }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+
+          {% if productos.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ productos.next_page_number }}&q={{ request.GET.q }}">Siguiente</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+</main>
+
+
+{% endblock contenido %}
+
+{% block js %}
+
+<script>
+        function mostrarConfirmacionReactivar(id, formId) {
+          Swal.fire({
+            title: '¿QUIERES REACTIVAR TU PUBLICACION?',
+            text: '¿Estás seguro de que deseas volver a activar este producto? Si lo haces volvera a verse en la ventana de "MIS PUBLICACIOES"',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'No',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Si el usuario confirma, se envía el formulario correspondiente
+              document.getElementById('ProductoReactivarForm' + formId).submit();
+            }
+          });
+        }
+      </script>
+
+      <script>
+        function mostrarConfirmacionEliminar(id, formId) {
+          Swal.fire({
+            title: '¿QUIERES ELIMINAR TU PUBLICACION DE FORMA DEFINITIVA?',
+            text: '¿Estás seguro de que deseas ELIMINAR este producto? Si lo haces se BORRARA DEFINITIVAMENTE',
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'No',
+          }).then((result) => {
+            if (result.isConfirmed) {
+              // Si el usuario confirma, se envía el formulario correspondiente
+              document.getElementById('ProductoEliminarForm' + formId).submit();
+            }
+          });
+        }
+      </script>
+
+{% endblock js %}

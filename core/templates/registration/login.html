@@ -1,0 +1,115 @@
+{% load static %}
+
+
+{% block static %}
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+{% endblock static %}
+
+
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg" style="height: 70px; background-color: #2765a2; opacity: 1;"></nav>
+
+<!-- Spacing -->
+<br>
+<br>
+
+<!-- Main Container -->
+<div class="container">
+    <div class="login-form" style="border-radius: 10px;">
+        <!-- Form Title with Logo -->
+        <div class="form-title"
+            style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
+            <h1 style="margin-right: 10px; color: #acaca3;"><strong>Zippy</strong></h1>
+            <img style="width: 160px;" src="{% static 'img/LogoDUOC.png' %}" alt="Logo">
+        </div>
+
+        <!-- Subtitle -->
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <h6 class="text-center text-muted mb-3">
+                        Tu plataforma de ventas, intercambio y regalo de material educativo
+                    </h6>
+                    <br>
+                    <br>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Block -->
+
+
+{% block contenido %}
+
+
+
+
+        <!-- Load Crispy Forms Tags -->
+        {% load crispy_forms_tags %}
+
+        <!-- Form Section -->
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-6 offset-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <!-- Form Header -->
+                            <h2 style="text-align: center;"><strong>Inicio Sesión</strong></h2>
+                            <hr>
+                            <!-- Login Form -->
+                            <form action="" method="POST">
+                                {% csrf_token %}
+                                {{ form|crispy }}
+
+
+                                <!-- Submit Button -->
+                                <button class="btn btn-primary w-100 py-2" type="submit">Iniciar Sesión</button>
+                                <br>
+
+
+                                <div class="text-center mb-2" style="margin-top: 20px;">
+                                    <h4><a href="{% url 'registro' %}">¿No tienes cuenta, Registrate</a></h4>
+                                </div>
+
+                                <!-- Link para recuperar contraseña -->
+                                <div class="text-center mb-2" style="margin-top: 20px;">
+                                    <h4><a href="{% url 'password_reset' %}">¿Olvidaste tu contraseña?</a></h4>
+                                </div>
+
+                            </form>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+{% endblock contenido %}
+
+<br>
+
+<!-- Responsive Adjustments -->
+<style>
+    @media (max-width: 767px) {
+        .container {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+    }
+</style>

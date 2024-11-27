@@ -1,0 +1,364 @@
+{% extends 'core/base.html' %}
+
+{% load static %}
+
+{% block title %}Lista Productos{% endblock %}
+
+{% block contenido %}
+
+<style>
+
+
+
+.input-group {
+        margin: 15px auto; /* Reducir margen superior e inferior */
+        max-width: 600px;
+    }
+
+    .table {
+        margin-top: 20px; /* Reducir el margen superior de la tabla */
+    }
+    /* Estilos globales */
+    body {
+        font-family: 'Roboto', sans-serif; /* Tipografía moderna y legible */
+        background-color: #f4f4f9; /* Fondo gris claro para la página */
+        margin: 0;
+        padding: 0;
+    }
+
+    main {
+        margin-top: 0; /* Ajustar a 20px o menos para subir el contenido */
+        
+    }
+
+    h1 {
+        font-size: 2.5rem; /* Tamaño grande para el título */
+        font-weight: bold;
+        color: #333; /* Color de texto oscuro */
+        text-align: center;
+        margin-bottom: 3px;
+    }
+
+    .container-sm {
+        max-width: 1000px; /* Establecer un ancho máximo para la página */
+        margin: 0 auto; /* Centrar la página */
+        padding: 20px;
+    }
+
+    /* Barra de búsqueda */
+    .input-group {
+        
+        max-width: 600px; /* Ajustar el ancho de la barra de búsqueda */
+    }
+
+    .input-group .form-control {
+        border-radius: 0.375rem;
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ddd; /* Borde gris suave */
+    }
+
+    .input-group .btn-warning {
+        background-color: #FFEB3B;
+        border-color: #FFB300;
+        color: black;
+        border-radius: 0.375rem;
+        font-weight: bold;
+    }
+
+    .input-group .btn-warning:hover {
+        background-color: #FFB300;
+    }
+
+    /* Tabla de productos */
+    .table {
+        width: 100%;
+        margin-top: 30px;
+        border-radius: 0.375rem;
+        overflow: hidden;
+        border-collapse: collapse;
+        background-color: #fff;
+    }
+
+    .table thead {
+        background-color: #FFEB3B; /* Fondo amarillo para encabezado */
+        color: #000;
+        text-align: center;
+    }
+
+    .table tbody tr:nth-child(even) {
+        background-color: #f9f9f9; /* Color gris claro para filas pares */
+    }
+
+    .table tbody tr:nth-child(odd) {
+        background-color: #ffffff; /* Blanco para filas impares */
+    }
+
+    .table th, .table td {
+        padding: 12px;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 1rem;
+    }
+
+    /* Mejorar apariencia de las imágenes de productos */
+    .table img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    /* Botones de acción */
+    .btn-group .btn {
+        padding: 8px 16px;
+        font-size: 1rem;
+        border-radius: 0.375rem;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+    .btn-warning {
+        background-color: #FFEB3B;
+        color: black;
+    }
+
+    .btn-warning:hover {
+        background-color: #FFB300;
+        transform: scale(1.05);
+    }
+
+    .btn-danger {
+        background-color: #FF5733;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #C0392B;
+        transform: scale(1.05);
+    }
+
+    /* Paginación */
+    .pagination {
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .pagination .page-item {
+        margin: 0 5px;
+    }
+
+    .pagination .page-link {
+        padding: 8px 16px;
+        background-color: #FFEB3B;
+        color: black;
+        border: none;
+        border-radius: 50%;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #FFB300;
+    }
+
+    .pagination .active .page-link {
+        background-color: #FFB300;
+        color: white;
+    }
+
+    /* Agregar sombra y bordes redondeados a las tarjetas y botones */
+    .card {
+        border-radius: 0.5rem; /* Bordes redondeados */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+    }
+
+    .btn-group .btn {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra para botones */
+    }
+
+    .table th, .table td {
+        border: 1px solid #ddd; /* Bordes finos y sutiles para celdas */
+    }
+
+    .pagination .page-link {
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Sombra suave para los enlaces de paginación */
+    }
+
+    /* Agregar íconos a los botones de acción */
+    .btn-warning i, .btn-danger i {
+        margin-right: 5px; /* Espaciado entre el icono y el texto */
+    }
+
+    .btn-warning:hover i, .btn-danger:hover i {
+        transform: translateX(5px); /* Desplazar el icono un poco al pasar el mouse */
+    }
+
+    /* Efecto de hover en las filas de la tabla */
+    .table tbody tr:hover {
+        background-color: #f0f0f0;
+        cursor: pointer;
+    }
+
+    /* Estilos de la imagen en la tabla */
+    .table img {
+        width: 60px; /* Tamaño inicial de la imagen */
+        height: 60px;
+        object-fit: cover;
+        border-radius: 50%;
+        transition: transform 0.3s ease, z-index 0s; /* Transición suave y sin afectar z-index */
+    }
+
+    /* Efecto de agrandado cuando el puntero pasa sobre la imagen */
+    .table img:hover {
+        transform: scale(1.5); /* Aumentar el tamaño de la imagen al 150% */
+        z-index: 10; /* Asegurar que la imagen se superponga sobre otros elementos */
+        cursor: pointer; /* Cambiar el cursor a la mano */
+    }
+
+</style>
+
+
+<!-- Aquí puedes agregar más contenido específico del lista productos -->
+
+
+<main style="margin-top: 90px">
+    <form method="GET" action="{% url 'ProductoListar' %}">
+        <div class="input-group" style="width: 93%; margin-left: 20px; margin-right: 20px;">
+            <input type="text" name="q" class="form-control" placeholder="Ingresa para buscar" value="{{ request.GET.q }}">
+            <button type="submit" class="btn btn-warning"><i class="fa fa-search"></i></button>
+        </div>
+    </form>
+
+    <br>
+    <h1 style="margin-left: 5%; margin-right: 5%; text-align: center; font-weight: bold;">
+        {% if user.is_authenticated and user.email == 'admin@admin.cl' %}
+            Lista Total de Productos
+        {% else %}
+            Lista Mis Productos
+        {% endif %}
+    </h1>
+    <br>
+    <table class="table table-striped" style="width: 93%; margin-left: 20px; margin-right: 20px;">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nombre Producto</th>
+                <th scope="col">Imagen Producto</th>
+                <th scope="col">Tipo Transacción</th>
+                <th scope="col">Descripción</th>
+                <th scope="col">Categoría</th>
+                <th scope="col">Tags</th>
+                {% if request.user.email == 'admin@admin.cl' %}
+                <th scope="col">Usuario</th>
+                {% endif %}
+                <th scope="col">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos %}
+            <tr>
+                <th scope="row">{{ productos.start_index|add:forloop.counter0 }}</th>
+                <td>{{ producto.p_nombre }}</td>
+                <td>
+                    <div class="text-center">
+                        <div style="width: 80px; height: 80px; overflow: hidden;">
+                            <img src="{{ producto.p_img.url }}" alt="{{ producto.p_nombre }}.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                        </div>
+                    </div>
+                </td>
+                <td>{{ producto.p_tipoTrans }}</td>
+                <td>{{ producto.p_descripcion|truncatechars:20 }}</td>
+                <td>{{ producto.p_categoria }}</td>
+                <td>{{ producto.p_tags }}</td>
+                {% if request.user.email == 'admin@admin.cl' %}
+                <td>{{ producto.p_account_email.email }}</td>
+                {% endif %}
+                <td>
+                    <div class="btn-group">
+                        <button class="btn btn-warning btn-lg btn-grow" title="Modificar" onclick="event.preventDefault(); mostrarConfirmacionEditarPublicacion('{{ producto.id }}')">
+                            <i class="fas fa-pencil-alt"></i>
+                        </button>
+
+                        <form method="POST" action="{% url 'ProductoDesactivar' %}" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                            <button class="btn btn-danger btn-lg btn-grow" title="Desactivar" onclick="event.preventDefault(); mostrarConfirmacionDesactivar('{{ producto.id }}')">
+                                <i class="fa-solid fa-eye-slash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-center">
+        <nav aria-label="PaginacionElementos">
+            <ul class="pagination">
+                {% if productos.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ productos.previous_page_number }}">Anterior</a>
+                </li>
+                {% endif %}
+
+                {% for i in productos.paginator.page_range %}
+                <li class="page-item {% if productos.number == i %}active{% endif %}">
+                    <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                </li>
+                {% endfor %}
+
+                {% if productos.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ productos.next_page_number }}">Siguiente</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+
+    
+</main>
+
+
+
+
+{% endblock contenido %}
+
+{% block js %}
+
+<script>
+        
+        function mostrarConfirmacionEditarPublicacion(id) {
+            Swal.fire({
+                title: '¿QUIERES EDITAR?',
+                text: '¿Realmente deseas editar este producto?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'No',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var url = "{% url 'ProductoModificar' id=0 %}".replace('0', id);
+                    window.location.href = url;
+                }
+            });
+        }
+
+        function mostrarConfirmacionDesactivar(id) {
+            Swal.fire({
+                title: '¿QUIERES DESACTIVAR ESTA PUBLICACION?',
+                text: '¿Estás seguro de que deseas desactivar este producto?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí',
+                cancelButtonText: 'No',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.querySelector(`input[name='producto_id'][value='${id}']`).value = id;
+                    document.querySelector('form[action="{% url 'ProductoDesactivar' %}"]').submit();
+                }
+            });
+        }
+    </script>
+
+
+{% endblock js %}

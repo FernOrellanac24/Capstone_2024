@@ -1,0 +1,188 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block contenido %}
+<style>
+    .star-rating .fa-star {
+        color: lightgray;
+    }
+
+    .star-rating .fa-star.checked {
+        color: gold;
+    }
+</style>
+
+<main style="margin-top: 90px; margin-left: 2%; margin-right: 2%;">
+
+    {% if messages %}
+    <div class="alert-container">
+        {% for message in messages %}
+        <div class="alert {{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Formulario de búsqueda -->
+    <form method="GET" action="{% url 'home' %}">
+        <div class="input-group mb-4" style="width: 93%; margin-left: 20px;">
+            <input type="text" name="q" class="form-control" placeholder="Buscar por nombre o característica"
+                value="{{ request.GET.q }}">
+            <button type="submit" class="btn btn-warning"><i class="fa fa-search"></i></button>
+        </div>
+    </form>
+
+    <!-- Tarjetas de productos -->
+    <div class="row row-cols-1 row-cols-md-5">
+        {% for item in productos_con_promedio %}
+        <div class="col mb-4">
+            <div class="card text-white mb-3"
+                style="max-width: 18rem; background-image: url({{ item.producto.p_img.url }}); background-size: cover;">
+                <div class="card-overlay"></div>
+                <div class="card-header">
+                    {% if item.producto.p_tipoTrans_id == 1 %}
+                    <span><i class="fas fa-hands"></i></span> Cambio
+                    {% elif item.producto.p_tipoTrans_id == 2 %}
+                    <span><i class="fas fa-gift"></i></span> Regalo
+                    {% elif item.producto.p_tipoTrans_id == 3 %}
+                    <span><i class="fas fa-shopping-cart"></i></span> Venta
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ item.producto.p_nombre }}</h5>
+                    <p class="card-text">{{ item.producto.p_descripcion|truncatechars:50 }}</p>
+
+                    <!-- Mostrar el Promedio de Calificación -->
+                    <h6>Calificacion: {{ item.producto.p_account_email.nombre }}</h6>
+                    <div class="star-rating">
+                        {% for i in rango %}
+                        {% if i <= item.promedio_valoracion %} <span class="fa fa-star checked"></span>
+                            {% else %}
+                            <span class="fa fa-star"></span>
+                            {% endif %}
+                            {% endfor %}
+                            <span>{{ item.promedio_valoracion }} / 5</span>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                            data-bs-target="#modalCards{{ forloop.counter }}">
+                            <i class="fas fa-eye"></i> Ver más
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="modalCards{{ forloop.counter }}" tabindex="-1"
+            aria-labelledby="modalCardsLabel{{ forloop.counter }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ item.producto.p_account_email.nombre }} {{ item.producto.p_account_email.apellido|default:"No disponible" }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <img src="{{ item.producto.p_img.url }}" class="img-fluid" alt="Imagen del producto">
+                        <p style="margin-top: 10px;"><strong>Producto: </strong>{{ item.producto.p_nombre }}</p>
+                        <p><strong>Descripción:</strong> {{ item.producto.p_descripcion }}</p>
+                        <p><strong>Transacción:</strong>
+                            {% if item.producto.p_tipoTrans_id == 1 %} Cambio
+                            {% elif item.producto.p_tipoTrans_id == 2 %} Regalo
+                            {% elif item.producto.p_tipoTrans_id == 3 %} Venta
+                            {% endif %}
+                        </p>
+
+                        <!-- Mostrar el Promedio de Calificación -->
+                        <h6>Calificacion usuario: </h6>
+                        <div class="star-rating">
+                            {% if item.promedio_valoracion == 0 %}
+                            <span>No tiene calificación</span>
+                            {% else %}
+                            {% for i in rango %}
+                            {% if i <= item.promedio_valoracion %} <span class="fa fa-star checked"></span>
+                                {% else %}
+                                <span class="fa fa-star"></span>
+                                {% endif %}
+                                {% endfor %}
+                                <span>{{ item.promedio_valoracion }} / 5</span>
+                                {% endif %}
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <!-- Formularios para la acción según el tipo de transacción -->
+                        {% if item.producto.p_tipoTrans_id == 1 %}
+                        <form method="post" action="{% url 'optar_a_cambio' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="producto_id" value="{{ item.producto.id }}">
+                            <input type="hidden" name="usuario_dueño" value="{{ item.producto.p_account_email.id }}">
+                            <button type="submit" class="btn btn-primary">Optar a Cambio</button>
+                        </form>
+                        {% elif item.producto.p_tipoTrans_id == 2 %}
+                        <form method="post" action="{% url 'optar_a_regalo' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="producto_id" value="{{ item.producto.id }}">
+                            <input type="hidden" name="usuario_dueño" value="{{ item.producto.p_account_email.id }}">
+                            <button type="submit" class="btn btn-primary">Optar a Regalo</button>
+                        </form>
+                        {% elif item.producto.p_tipoTrans_id == 3 %}
+                        <form method="post" action="{% url 'optar_a_venta' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="producto_id" value="{{ item.producto.id }}">
+                            <input type="hidden" name="usuario_dueño" value="{{ item.producto.p_account_email.id }}">
+                            <button type="submit" class="btn btn-primary">Optar a Venta</button>
+                        </form>
+                        {% endif %}
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+    </div>
+
+    <!-- Paginación -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if productos_con_promedio.has_previous %}
+            <li class="page-item"><a class="page-link"
+                    href="?page={{ productos_con_promedio.previous_page_number }}">Anterior</a></li>
+            {% endif %}
+            {% for i in productos_con_promedio.paginator.page_range %}
+            <li class="page-item {% if productos_con_promedio.number == i %}active{% endif %}">
+                <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+            {% if productos_con_promedio.has_next %}
+            <li class="page-item"><a class="page-link"
+                    href="?page={{ productos_con_promedio.next_page_number }}">Siguiente</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</main>
+
+<style>
+    .card-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+    }
+
+    .card-header,
+    .card-body {
+        position: relative;
+        z-index: 2;
+    }
+</style>
+
+{% endblock contenido %}

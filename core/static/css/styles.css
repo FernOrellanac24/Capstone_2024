@@ -1,0 +1,67 @@
+
+    /* Fixed sidebar with controlled width */
+    #sidebarMenu {
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 250px; /* Set the desired width */
+      background-color: #f8f9fa;
+      overflow-y: auto;
+      z-index: 1;
+      transition: transform 0.3s ease; /* Transition for smooth slide in/out */
+    }
+
+    /* Main content should avoid being overlapped by the sidebar */
+    main {
+      margin-left: 250px; /* Same width as the sidebar */
+    }
+
+    /* Hide sidebar by default on small screens */
+    @media (max-width: 992px) {
+      #sidebarMenu {
+        transform: translateX(-100%); /* Hide sidebar */
+      }
+      main {
+        margin-left: 0; /* Remove margin for main content */
+      }
+      #sidebarMenu.show {
+        transform: translateX(0); /* Show sidebar when toggled */
+      }
+    }
+
+    /* Add margin to session icons for better spacing */
+    .btn-group .btn {
+      margin-right: 5px;
+    }
+
+    /* Navbar fixed at top */
+    #main-navbar {
+      background-color: #2765a2;
+    }
+
+    /* Hamburger button styling for mobile */
+    .navbar-toggler {
+      background-color: #fff;
+      border: none;
+      padding: 8px;
+    }
+
+    /* Adjust navbar brand and logo spacing for smaller screens */
+    .navbar-brand h2 {
+      margin-right: 10px;
+    }
+
+    @media (max-width: 576px) {
+      .navbar-brand h2 {
+        font-size: 1.25rem; /* Smaller font for brand */
+      }
+    }
+
+    .star-rating .fa-star {
+      color: #ccc; /* Color gris para estrellas vacías */
+  }
+  .star-rating .fa-star.checked {
+      color: #f39c12; /* Color dorado para estrellas llenas */
+  }
+  

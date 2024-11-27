@@ -1,0 +1,135 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Mensajes de Usuario{% endblock %}
+
+{% block contenido %}
+<main style="margin-top: 90px">
+  <div class="row">
+    <div class="col">
+      {% if match_producto %}
+      <!-- Banner -->
+      <div class="banner"
+        style="position: relative; width: 100%; background-image: url({% static 'img/banner2.jpg' %}); background-size: cover;">
+        <div class="banner-content"
+          style="position: relative; width: 100%; height: 120px; background-color: rgba(0, 0, 0, 0.5); color: white; padding: 5px;">
+          <div class="product-image"
+            style="width: 90px; height: 90px; border-radius: 50%; overflow: hidden; margin-right: 10px;">
+            <img src="{{ match_producto.producto.p_img.url }}"
+              alt="Imagen del producto {{ match_producto.producto.p_nombre }}" loading="lazy"
+              style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div class="product-details" style="position: absolute; top: 5px; left: 105px;">
+            <p style="font-size: 12px; line-height: 16px; margin: 5px 0;">Producto:
+              <span style="color: #ffff00; font-weight: bold;">{{ match_producto.producto.p_nombre }}</span>
+            </p>
+            <p style="font-size: 12px; line-height: 16px; margin: 5px 0;">Dueño:
+              <span style="color: #00aae4; font-weight: bold;">
+                {{ match_producto.usuario_dueño.nombre|default:"Nombre no disponible" }}
+                {{ match_producto.usuario_dueño.email|default:"Email no disponible" }}
+              </span>
+            </p>
+            <p style="font-size: 12px; line-height: 16px; margin: 5px 0;">Solicitante:
+              <span style="color: #ffa500; font-weight: bold;">
+                {{ match_producto.usuario_solicitante.nombre|default:"Nombre no disponible" }} 
+                {{match_producto.usuario_solicitante.email|default:"Email no disponible" }}
+              </span>
+            </p>
+            <p style="font-size: 12px; line-height: 16px; margin: 5px 0;">Fecha de propuesta:
+              <span style="color: #ffff00; font-weight: bold;">{{ match_producto.fecha_propuesta }}</span>
+            </p>
+            {% if match_producto.producto_propuesto %}
+            <p style="font-size: 12px; line-height: 16px; margin: 5px 0;">Producto Propuesto:
+              <span style="color: #ffa500; font-weight: bold;">{{ match_producto.producto_propuesto.p_nombre }}</span>
+            </p>
+            {% endif %}
+          </div>
+          <div class="button-container" style="position: absolute; top: 5px; right: 5px;">
+            {% if puede_valorar %}
+            <a href="{% url 'valoracion_match' postmatch_id=match_producto.pk %}" class="btn btn-danger">
+              Valorar y Finalizar Match
+            </a>
+            {% else %}
+            <p>No se puede valorar el match.</p>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+      {% else %}
+      <p>No se encontró el match.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Mensajes -->
+  <div class="container" style="height: calc(60vh - 100px); overflow-y: scroll;" id="message-container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="messages">
+          {% if citas %}
+          {% with first_user=citas.0.usuarioPost.nombre %}
+          {% for cita in citas %}
+          <div class="message">
+            <div class="user">
+              {% if cita.usuarioPost.nombre == first_user %}
+              <div class="card text-white bg-success mb-3 message-right">
+                {% else %}
+                <div class="card text-white bg-primary mb-3 message-left">
+                  {% endif %}
+                  <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span>{{ cita.usuarioPost.nombre }} {{ cita.usuarioPost.apellido }}</span>
+                      <span class="badge badge-primary badge-pill">#{{ forloop.counter }}</span>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">{{ cita.mensajePost }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            {% endwith %}
+            {% else %}
+            <p>No hay mensajes disponibles.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enviar mensaje -->
+    <div class="chat-box" style="background-color: #f5f5f5; padding: 10px; height: calc(30vh - 100px);">
+      <form class="quote-form" action="{% url 'ChatMensajes' postmatch_id=postmatch_id %}" method="post"
+        style="display: flex;">
+        {% csrf_token %}
+        <div class="form-group" style="width: 80%;">
+          <textarea class="form-control" name="mensaje" rows="3" style="height: 100%; width: 100%;"
+            placeholder="Escribe tu mensaje" required></textarea>
+          {% if form.mensaje.errors %}
+          <div class="text-danger" style="font-size: 12px;">{{ form.mensaje.errors }}</div>
+          {% endif %}
+        </div>
+        <button class="btn btn-primary" type="submit" style="width: 10%; margin-left: 10px;">Enviar</button>
+      </form>
+    </div>
+</main>
+
+{% endblock contenido %}
+
+{% block js %}
+<script>
+  // Desplazamiento automático al final del contenedor de mensajes
+  document.getElementById("message-container").scrollTop = document.getElementById("message-container").scrollHeight;
+
+  // Validación del formulario para evitar mensajes vacíos
+  document.querySelector('.quote-form').addEventListener('submit', function (event) {
+    const textarea = this.querySelector('textarea[name="mensaje"]');
+    if (textarea.value.trim() === "") {
+      event.preventDefault();
+      alert("Por favor, escribe un mensaje antes de enviar.");
+    }
+  });
+</script>
+{% endblock js %}
